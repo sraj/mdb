@@ -8,7 +8,7 @@ import (
 )
 
 type (
-  Config struct {
+	Config struct {
 		ConnectionURL string
 		Database      string
 	}

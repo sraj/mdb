@@ -27,11 +27,11 @@ func (s *MdbTestSuite) Test_Connection(c *C) {
 }
 
 func (s *MdbTestSuite) Test_Connect(c *C) {
-  conn := &mdb.Connection{
+	conn := &mdb.Connection{
 		Config: &mdb.Config{
-  		ConnectionURL: "localhost:37017",
-  		Database:      "mdbtest",
-  	},
+			ConnectionURL: "localhost:37017",
+			Database:      "mdbtest",
+		},
 	}
 	err := conn.Connect()
 	defer conn.Close()
@@ -46,7 +46,7 @@ func MongoConnect() (*mdb.Connection, error) {
 }
 
 func (s *MdbTestSuite) Test_RunString(c *C) {
-  conn, err := MongoConnect()
+	conn, err := MongoConnect()
 	defer conn.Close()
 
 	result := struct{ Ok int }{}
