@@ -10,6 +10,8 @@ import (
 
 type M map[string]interface{}
 
+type Change mgo.Change
+
 type Config struct {
 	ConnectionURL string
 	Database      string
@@ -26,6 +28,7 @@ type Query struct {
 	Sort   string
 	Limit  int
 	Skip   int
+	//TODO: Prefetch, Batch etc.,
 }
 
 var defaultLimit = 20
@@ -81,8 +84,8 @@ func (t *Connection) Collection(name string) *mgo.Collection {
 	return t.session.DB(t.Config.Database).C(name)
 }
 
-func (t *Connection) Insert(name string, docs ...interface{}) error {
-	return t.Collection(name).Insert(docs...)
+func (t *Connection) DropCollection(name string) error {
+	return t.Collection(name).DropCollection()
 }
 
 func (t *Connection) processQuery(iq Query, mq *mgo.Query) *mgo.Query {
@@ -114,4 +117,34 @@ func (t *Connection) FindOne(name string, query Query, result interface{}) error
 	mq := t.Collection(name).Find(query.Filter)
 	mq = t.processQuery(query, mq)
 	return mq.One(result)
+}
+
+func (t *Connection) Count(name string, query Query) (int, error) {
+	return t.Collection(name).Find(query.Filter).Count()
+}
+
+func (t *Connection) Insert(name string, docs ...interface{}) error {
+	return t.Collection(name).Insert(docs...)
+}
+
+func (t *Connection) Update(name string, query Query, change Change, result interface{}) error {
+	_, err := t.Collection(name).Find(query.Filter).Apply(mgo.Change(change), result)
+	return err
+}
+
+func (t *Connection) UpdateAll(name string, query Query, change Change) (int, error) {
+	info, err := t.Collection(name).UpdateAll(query.Filter, mgo.Change(change))
+	if err != nil {
+		return 0, err
+	}
+	return info.Updated, err
+}
+
+func (t *Connection) RemoveOne(name string, query Query) error {
+	return t.Collection(name).Remove(query.Filter)
+}
+
+func (t *Connection) RemoveAll(name string, query Query) error {
+	_, err := t.Collection(name).RemoveAll(query.Filter)
+	return err
 }
