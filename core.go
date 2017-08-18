@@ -2,7 +2,6 @@ package mdb
 
 import (
 	"errors"
-	_ "fmt"
 	"time"
 
 	"gopkg.in/mgo.v2"
@@ -18,14 +17,14 @@ type Config struct {
 }
 
 type Connection struct {
-	Config  *Config
+	config  *Config
 	session *mgo.Session
 }
 
 type Query struct {
 	Filter M
 	Fields M
-	Sort   string
+	Sort   []string
 	Limit  int
 	Skip   int
 	//TODO: Prefetch, Batch etc.,
@@ -33,9 +32,9 @@ type Query struct {
 
 var defaultLimit = 20
 
-func NewConnection(config *Config) (*Connection, error) {
+func New(config *Config) (*Connection, error) {
 	conn := &Connection{
-		Config: config,
+		config: config,
 	}
 	err := conn.Connect()
 	return conn, err
@@ -54,7 +53,7 @@ func (t *Connection) Connect() (err error) {
 		}
 	}()
 
-	session, err := mgo.DialWithTimeout(t.Config.ConnectionURL, 5*time.Second)
+	session, err := mgo.DialWithTimeout(t.config.ConnectionURL, 5*time.Second)
 	if err != nil {
 		return err
 	}
@@ -76,12 +75,19 @@ func (t *Connection) Close() {
 	}
 }
 
+func (t *Connection) SetDatabase(name string) *mgo.Database {
+	if name != "" {
+		t.config.Database = name
+	}
+	return t.session.DB(t.config.Database)
+}
+
 func (t *Connection) DropDatabase() error {
-	return t.session.DB(t.Config.Database).DropDatabase()
+	return t.session.DB(t.config.Database).DropDatabase()
 }
 
 func (t *Connection) Collection(name string) *mgo.Collection {
-	return t.session.DB(t.Config.Database).C(name)
+	return t.session.DB(t.config.Database).C(name)
 }
 
 func (t *Connection) DropCollection(name string) error {
@@ -93,12 +99,15 @@ func (t *Connection) processQuery(iq Query, mq *mgo.Query) *mgo.Query {
 	if iq.Fields != nil {
 		mq = mq.Select(iq.Fields)
 	}
-	if iq.Sort != "" {
-		mq = mq.Sort(iq.Sort)
+
+	if iq.Sort != nil {
+		mq = mq.Sort(iq.Sort...)
 	}
+
 	if iq.Skip > 0 {
 		mq = mq.Skip(iq.Skip)
 	}
+
 	if iq.Limit == 0 {
 		iq.Limit = defaultLimit
 	}

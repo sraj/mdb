@@ -1,0 +1,26 @@
+version: '2'
+services:
+
+  mdb:
+    image: golang:1.7.3-alpine
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    volumes:
+      - .:/go/src/github.com/sraj/mdb
+    command: bash -c "go test -v"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:3.4
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    volumes:
+      - mdb-mongo:/data/db
+    ports:
+      - 27017:27017
+
+volumes:
+  mdb-mongo:
