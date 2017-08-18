@@ -24,3 +24,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+#govendor packages
+vendor/*
+!vendor/vendor.json
