@@ -1,2 +1,3 @@
 # mdb
-A thin layer in Golang to access MongoDB
+
+Golang package **mdb** provides convenient wrapper methods to access MongoDB.
