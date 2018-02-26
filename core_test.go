@@ -5,8 +5,8 @@ import (
 
 	"github.com/sraj/mdb"
 
+	"github.com/globalsign/mgo/bson"
 	"gopkg.in/check.v1"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // Hook up gocheck into the "go test" runner.

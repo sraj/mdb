@@ -13,7 +13,7 @@ status:
 	@docker-compose ps
 
 test:
-	@docker-compose run --rm mdb go test -v
+	@docker-compose run --rm mdb go test -check.v
 
 mongocli:
 	@docker-compose exec mongo sh
