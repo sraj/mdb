@@ -8,7 +8,7 @@ services:
       - 8.8.4.4
     volumes:
       - .:/go/src/github.com/sraj/mdb
-    command: bash -c "go test -v"
+    command: bash -c "go get ./..."
     depends_on:
       - mongo
 
